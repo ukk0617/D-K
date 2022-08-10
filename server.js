@@ -48,14 +48,17 @@ connection.changeUser({database:'wordpress'},(err) =>{
 
 // routing
 // views
-    //testing
-app.get('/index.js', function(req,res) {
-    res.render(__dirname+'main.html');
-});
-    //login view
+    //index.html
 app.get('/',function(req,res){
     if(req.session.logined){
-        res.render(__dirname+'/views/logout.html',{id: req.session.user_id});
+        res.render(__dirname+'/views/index.html',{id: req.session.user_id});
+    }else 
+    res.render(__dirname+'/views/index.html')
+})
+    //login view
+app.get('/login.html',function(req,res){
+    if(req.session.logined){
+        res.render(__dirname+'/views/main.html',{id: req.session.user_id});
     }else 
     res.render(__dirname+'/views/login.html')
 });
@@ -98,7 +101,7 @@ app.post('/login.js',function(req,res){
             
                 req.session.logined= true;
                 req.session.user_id=req.body.id;
-                res.render(__dirname+'/views/login.ejs',{data});
+                res.render(__dirname+'/views/main.html',{data});
             }
                 // 다르면 로그인 실패, 에러를 출력하고 다시 로그인 페이지로
             else
