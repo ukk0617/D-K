@@ -1,14 +1,16 @@
 // include module
 var express = require('express');
 var mysql =require('mysql');
-var bodyParser=require('body-parser');
+//var bodyParser=require('body-parser');
 var app = express();
 var session= require('express-session');
 var fileStore= require('session-file-store')(session);
 // load moudle, 미들웨어 실행
 app.use(express.static('static')); 
-app.use(bodyParser.urlencoded({extended : true}));
-app.use(bodyParser.json());
+//app.use(bodyParser.urlencoded({extended : true}));
+//app.use(bodyParser.json());
+app.use(express.urlencoded({extended : true}));
+app.use(express.json());
 app.use(session({
     secret: 'sung',
     resave: false,
@@ -58,7 +60,7 @@ app.get('/',function(req,res){
     //login view
 app.get('/login.html',function(req,res){
     if(req.session.logined){
-        res.render(__dirname+'/views/main.html',{id: req.session.user_id});
+        res.render(__dirname+'/views/main.html',{data: req.session.user_id});
     }else 
     res.render(__dirname+'/views/login.html')
 });
@@ -126,6 +128,7 @@ app.post('/register.js',function(req,res){
         // DB에 쿼리문을 날려 err,rows,fields값을 받아오는 콜백함수를 사용한다.
     connection.query('SELECT * from member where id=?',data.id,function(err,rows,fields){
         if(err) {
+            // 쿼리 에러
             console.log('Error: '+err);
             throw err;
         }
@@ -135,11 +138,13 @@ app.post('/register.js',function(req,res){
             console.log(" datas : " + data.id +"  , "+data.password);
             connection.query('insert into member values(?,?,?,?,?,?)',params,function(err,results){
                 if(err){
+                    //쿼리 에러
                     console.log('Error insert query : '+err);
                     throw err;
-                }else{
-                    // 성공 창을 띄우고 이전 회원가입 페이지로 돌아간다
-                    res.send("<script>alert('success'); location.href='http://localhost:3000/register.html';</script> ");
+                }
+                else{
+                     // insert 쿼리 성공: 성공 창을 띄우고 이전 로그인 페이지로 돌아간다
+                     res.send("<script>alert('success'); location.href='http://localhost:3000/login.html';</script> ");
                 }
             });
         }else{
@@ -148,7 +153,7 @@ app.post('/register.js',function(req,res){
                 // + 비밀번호 유효성
                 // + 이메일 유효성
                 // + 전화번호 유효성 검사
-            res.render(__dirname+'/views/register.ejs',{data})
+                res.send("<script>alert('중복된 아이디입니다.'); location.href='http://localhost:3000/register.html';</script> ");
         }
     })
 });
